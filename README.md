@@ -1,340 +1,170 @@
+<div align="center">
+
 # Watchword
 
-**Subtitles in your language on Netflix and YouTube** — or both languages at
-once, with a dictionary card on any word and a spaced-repetition library behind
-it.
+### Some shows never get subtitles in your language.
 
-A Manifest V3 Chrome extension. No accounts, no analytics, and no server of its
-own: everything a user saves lives in their own browser.
+**Watchword translates the ones that are there** — one line, in your language,
+right on the Netflix or YouTube player.
 
-`5,856 lines shipped` · `1,697 more in tests and tooling` · `9 suites, 313 assertions, zero dependencies` · `3 UI languages` · `13 translation languages`
+Manifest V3 · Chrome · No account · No analytics · No server
 
----
-
-## What this repository is
-
-**A case study, not the source.** Watchword is a commercial product and its code
-is closed, so publishing it here would leak the payment configuration and the
-paid-tier logic along with it.
-
-What follows is the part that is actually worth reading anyway: the problems
-that were hard, the decisions that were not obvious, and the two experiments
-that changed my mind. Code appears as short excerpts where a sentence of prose
-would be vaguer than five lines of the real thing.
+</div>
 
 ---
 
-## The constraint that shaped everything
+## The problem
 
-Watchword has no backend. That was a product decision — "nothing is tracked" is
-a promise you can only make if there is nowhere for the data to go — and it
-turned into the main engineering constraint:
+If you live outside your own language, the catalogue does not serve you. A Turk
+in Germany opens Netflix and finds German subtitles, sometimes English, rarely
+Turkish. A Pole in the UK, an Arab in France, a Romanian in Spain — same
+evening, same wall.
 
-- **No server means no place to hide.** Translation caching, licence
-  validation, the review scheduler and the word library all run in the browser,
-  inside a Manifest V3 service worker that Chrome stops whenever it feels like
-  it.
-- **The extension is a guest on someone else's page.** Netflix and YouTube
-  re-render their players whenever they like, ship their own CSS, and never
-  agreed to host anything.
+Netflix does not translate subtitles. It offers the tracks a title happens to
+ship with, and if yours is not among them, that is the end of the conversation.
 
-Most of what follows is a consequence of one of those two facts.
-
-```
-                 ┌───────────────────────────────┐
-  player DOM ───▶│ content.js  (per-tab overlay) │
-  subtitle node  │  • platform adapter           │
-                 │  • renders the subtitle layer │
-                 └───────────────┬───────────────┘
-                                 │ chrome.runtime message
-                                 ▼
-                 ┌───────────────────────────────┐
-                 │ background.js (service worker)│
-                 │  • all network calls          │
-                 │  • one shared cache           │
-                 └───────────────────────────────┘
-```
-
-Content scripts make no network calls at all. Everything goes through the
-worker — partly so the streaming site's Content Security Policy cannot block
-us, partly so there is exactly one cache instead of one per tab.
+Watchword picks up where the platform stops.
 
 ---
 
-## Six problems worth explaining
+## Three ways to watch
 
-### 1. "It only works after a hard refresh"
+| | What you see | For |
+|---|---|---|
+| **Translation only** | One line, in your language | Watching something whose subtitles never come in your language |
+| **Dual** | The original with a translation underneath | Following along while still reading the original |
+| **Source only** | Just the original, hover any word | Studying — test yourself, look up only what you're stuck on |
 
-The oldest bug in the product, and the one that taught me the most.
+The same extension, one setting apart. That is why it works for an evening of
+television *and* for learning the language you are hearing.
 
-Subtitles would sometimes not appear until the user force-reloaded the page.
-Every node the extension injects is positioned relative to the player, so the
-code checked that it was still on the page before re-attaching:
+---
 
-```js
-if (!document.body.contains(el)) container.appendChild(el);
-```
+## Why it reads better
 
-That check answers **"is this node in the document"**. The question that
-mattered was **"is this node in the right parent"** — and the two come apart
-exactly when Netflix re-renders its player subtree. Once the overlay was moved
-under the wrong ancestor, `contains()` stayed `true` forever, so nothing ever
-put it back. An absolutely-positioned overlay under a `position: static`
-ancestor renders off-screen, which is why the symptom was "no subtitles" rather
-than "subtitles in a funny place".
+Machine-translated subtitles usually read badly, and the reason is not the
+engine — it is what the engine gets asked.
 
-```js
-function attach(el, container) {
-  if (el.parentElement !== container) container.appendChild(el);
-  return el;
-}
-```
+**A subtitle cue is a display unit, not a sentence.** "Ich habe gestern" and
+"mit ihm gesprochen." arrive as two separate cues. Translate each on its own and
+you get two halves of a thought. Watchword holds a cue that does not end a
+sentence and sends it together with the next one.
 
-Two related decisions came out of the same investigation:
+The difference, measured across eight sentences split the way a cue would split
+them — **all eight came out different**:
 
-- **Never fall back to `document.body`.** The old code did, and attaching to
-  the wrong element is worse than not attaching at all: it looks like success,
-  so nothing ever retries.
-- **Wait for both elements, not one.** On Netflix the node we observe
-  (`.player-timedtext`) and the node we attach to (`.watch-video`) are
-  different, and the subtitle node usually appears first. Starting on that
-  alone was what put the overlay under the wrong ancestor in the first place.
-
-A one-second health check now re-checks the parent, and the test suite proves
-the specific case: a node that is still `isConnected === true` but under the
-wrong parent gets moved back.
-
-### 2. The subtitle bug that was a CSS bug
-
-A user reported that translations came out in ALL CAPITALS. My first diagnosis
-was that the subtitle track itself was uppercase and the translation engine was
-preserving it — plausible, partly true, and **not the cause**.
-
-`text-transform` is an inherited property. The overlay is injected *inside* the
-site's player container, and nothing in the stylesheet reset it. A player that
-upper-cases its own caption layer silently upper-cases ours too.
-
-The lesson generalises: **an injected node inherits everything the host page
-hands down**, and a styling bug that arrives through inheritance looks like a
-bug in whatever the text went through last. This one cost hours in the
-translation pipeline before I thought to look at CSS.
-
-```css
-#ww-overlay, #ww-popup, #ww-hint {
-  /* Refuse whatever the page was about to hand down. */
-  text-transform: none;
-  font-style: normal;
-  font-variant: normal;
-  letter-spacing: normal;
-  word-spacing: normal;
-  text-indent: 0;
-}
-```
-
-A test now asserts that all three injected roots declare these, because the only
-way they disappear is someone tidying the stylesheet — and they are invisible
-until the day they matter.
-
-### 3. Translate sentences, not subtitle cues
-
-A subtitle cue is a display unit, not a sentence. "Ich habe gestern" and "mit
-ihm gesprochen." arrive as two separate cues, and translating each on its own is
-the single biggest reason machine-translated subtitles read badly: the engine is
-being asked about half a clause.
-
-Watchword holds a cue that does not end in punctuation and prepends it to the
-next one, so the endpoint sees a whole sentence. **This costs no extra
-requests** — each cue still triggers exactly one; the later ones simply carry
-more.
-
-I did not want to claim it worked without evidence, so I measured it. Eight
-sentences split the way a cue would split them, translated both ways:
-
-| translated cue by cue | translated as one sentence |
+| Translated cue by cue | Translated as one sentence |
 |---|---|
 | "dün yaptım onunla konuştu." | **"Dün onunla konuştum."** |
 | "Bana söyledi gelemeyeceğini." | **"Bana gelemeyeceğini söyledi."** |
 | "Ayakta duran kadın kapının yanında annem var." | **"Kapının yanında duran kadın benim annemdir."** |
+| "Bilmiyorum, bunun iyi bir fikir olup olmadığı." | **"Bunun iyi bir fikir olup olmadığını bilmiyorum."** |
 
-**8 of 8 differed**, and the left column is not merely clumsier — the first row
-is not grammatical Turkish at all. The measurement lives in the repo as a
-runnable script, so the claim can be re-checked if the engine changes.
+The left column is what you get elsewhere. The first row is not grammatical
+Turkish at all.
 
-Two caps keep the buffer honest, and both come from real footage rather than
-imagination: YouTube's auto-captions frequently contain **no punctuation at
-all**, so the string would otherwise grow for the length of the video; and a gap
-longer than five seconds means a seek or a scene change, so whatever comes next
-is not a continuation.
-
-That gap is measured in **video seconds, not wall-clock seconds** — a detail I
-got wrong first time. The extension has an auto-pause feature that stops the
-video on every subtitle line, so a careful viewer can sit on one cue for a
-minute. On a wall clock every gap looked like a scene change, which switched
-sentence joining off for exactly the users most likely to want it.
-
-### 4. The experiment that deleted a feature
-
-The obvious next step was a context window: send the *previous* sentence along
-with the current one so the engine can resolve pronouns and formality — German
-`sie` is "she", "they" or formal "you", and Turkish distinguishes the last one.
-
-I designed it, wrote the plan, and then measured before building.
-
-```
-context changed the output in 0 of 12 cases
-```
-
-Twelve pairs: two source languages, both newline- and space-joined, textbook
-ambiguities (*Bank* = bench/bank, *Schloss* = castle/lock, *bat*, *crane*), and
-formal versus informal address. The endpoint does not look at what precedes a
-sentence. **Its context window is one sentence.**
-
-So the feature was never written. It would have added complexity to the
-translation path, cut the cache hit rate (context becomes part of the key), and
-delivered nothing.
-
-The same measurement explains why the *previous* feature works: the boundary is
-the sentence, so completing a sentence helps and reaching past it does not.
-Both probes ship as a script whose expected result for the context mode is
-**zero** — if a future run returns anything else, the engine has changed and the
-idea is worth revisiting.
-
-I think this is the part of the project I would most want to be judged on. The
-feature that does not exist took more discipline than the four that do.
-
-### 5. Making the release checklist executable
-
-Shipping to the Chrome Web Store has a list of things that must be true, and two
-of them are the kind that only hurt after the fact:
-
-- a development flag that, if left on, hands **every user a one-click paid
-  unlock**
-- a payment configuration that, if pointed at the sandbox, fails **only for
-  customers who have already paid**
-
-A checklist in a markdown file does not stop either. So the build refuses:
-
-```
-$ node build.js --release
-NOT READY TO SHIP:
-  - WATCHWORD_POLAR_ENV = "sandbox" — must be production
-  - production.orgId is empty
-  - manifest.json still carries the sandbox host permission
-```
-
-The package's file list is **derived** from the manifest rather than maintained
-by hand — every page the extension opens, the fonts referenced by the
-stylesheets, the service worker's `importScripts`. The previous hand-written
-list had gone stale and was missing five files including the translation module,
-which produced a package that installed perfectly and then translated nothing.
-A test now locks the derivation.
-
-The same idea produced my favourite small test in the project: **every host
-permission in the manifest must appear in both privacy documents.** Requesting a
-permission you do not disclose is precisely what store review looks for, and I
-had already drifted once.
-
-### 6. Reading what an API actually does
-
-A licence key bought in the sandbox refused to activate:
-
-```
-NotPermitted — "This license key does not support activations."
-```
-
-The key was fine. The payment provider refuses `/activate` entirely when the
-benefit has no activation limit configured — with no limit there is no slot to
-take, so validation is the only check it offers.
-
-The part that mattered: **that setting is copied onto each key when the key is
-granted.** Turning the limit on later does not rescue keys already sold. So the
-fix could not live in a dashboard; it had to be in the client, which now falls
-back to validation for exactly that error.
-
-Diagnosing it meant reading the provider's responses rather than its
-documentation. An invented key returned `Not found` while the real one returned
-a different message — which proved the organisation ID was right and narrowed
-the problem to the key's own state.
+It costs nothing: each cue still triggers exactly one request. The later ones
+simply carry more.
 
 ---
 
-## Testing
+## What else it does
 
-Nine suites, 313 assertions, **zero dependencies**. `node test/run.js` works on a
-clean checkout with nothing installed.
+**Look up a word without leaving the video.** Hover or tap any word for its
+translation, dictionary entries, an example sentence, and pronunciation.
 
-The suites drive the real source against small hand-written fakes: `content.js`
-runs in a fake DOM, `settings.js` against a fake `chrome.storage`. Every suite
-exists because something went wrong once:
+**Keep the words worth keeping.** Save a word together with the line it appeared
+in and a link back to the scene. The library sorts itself into *new*,
+*learning* and *known*, and doubles as a spaced-repetition session — three
+boxes, one key per answer, and a way to retire a word once you are done with it.
 
-| suite | what it locks |
-|---|---|
-| `attach` | the parent-vs-document bug, and what each subtitle mode draws |
-| `sentence` | cue joining — punctuation, caps, seek detection |
-| `review` | spaced-repetition scheduling and retirement |
-| `studio` | the customisation contract and its injection boundary |
-| `pages` | page wiring, and that every UI string is both defined and used |
-| `package` | that the shipped package is complete and discloses its permissions |
-| `backup` · `stats` · `speed` | merge rules, streak arithmetic, rate normalisation |
+**Practise, not just watch.** Replay the current line with one key. Blur the
+translation until you have tried without it. Pause automatically on every new
+line. Slow the dialogue to 0.75× until you can hear the words.
 
-One test taught me something about testing itself. A cap in the sentence buffer
-had a bug: once hit, joining switched off for the rest of the video. The
-existing test asserted "the buffer does not grow" — which passed, because a
-buffer that is switched off does not grow either. **The test was true and
-useless.** Its replacement asserts that joining resumes *after* the cap.
+**Read it comfortably.** A subtitle editor with live preview: size, position,
+background, corner radius, blur and both text colours. When subtitles are how
+you follow the show, being able to read them is not decoration.
 
-Customisation values are validated as a **security boundary rather than a
-nicety**: they end up in `style.setProperty` on a third-party page, so numbers
-are clamped and colours must match `/^#[0-9a-f]{6}$/`. The suite keeps the
-injection cases.
+**Thirteen languages, any pair.** German, English, Turkish, Spanish, French,
+Italian, Portuguese, Dutch, Russian, Japanese, Korean, Chinese, Arabic. The
+interface itself speaks English, Turkish and German.
 
 ---
 
-## Design decisions
+## Privacy is the product, not a policy page
 
-**Two colour systems that never meet.** Tier identity (free/paid) lives in the
-extension's own chrome; word-progress state lives in content surfaces. They are
-deliberately different hues, so gold never has to mean both "lifetime" and
-"learning" in the same glance.
+Most tools in this space are cloud services wearing an extension's clothes: an
+account, a quota, your text on someone's server.
 
-**Weight, not colour.** The review buttons are told apart by ghost → tinted →
-solid → outlined, plus distinct glyphs. The first version used adjacent hues
-that were nearly identical under deuteranopia. If a distinction disappears in
-greyscale, it was never a distinction.
+Watchword has **no accounts, no analytics, and no servers of its own.** There is
+nothing to sign up for. Your saved words, your review schedule and your settings
+never leave your machine — there is nowhere for them to go.
 
-**Three durations, no more.** 120ms confirms an input, 180ms a state change,
-90ms an appearance. Subtitle lines get **zero** — a line changes every one to
-three seconds, and animating each change is an interface that flickers
-continuously. `prefers-reduced-motion` is honoured without exception: the video
-behind the UI is already a moving background.
-
-**The customisation preview is the product.** The editor page loads the real
-overlay stylesheet and applies settings through the same function the video
-does, so the preview cannot drift from the result.
+The honest limit, stated plainly: subtitle lines and the words you hover are
+sent to Google's public translate service to be translated, and cached on your
+own device afterwards. That is the one thing that leaves, and it is the feature
+you asked for.
 
 ---
 
-## What is not finished
+## Pricing
 
-- **Store submission.** The build gate still lists the production payment
-  configuration as outstanding.
-- **Screenshots.** The ones in the product repo show a previous interface. They
-  have to be retaken while a development flag is still on, because the tier
-  switcher depends on it — a sequencing detail that is easy to discover too
-  late.
-- **More platforms.** The adapter interface is eight methods and adding a site
-  is mostly writing one; the cost is not code but that each new host permission
-  is another review round.
-- **A second translation engine.** Now that translation is the product's core
-  rather than a study aid, depending on a single unofficial endpoint is a
-  strategic risk more than a quality one.
+Free is a real product, not a trailer: all three modes, word lookup, all
+thirteen languages, spaced-repetition review, and up to 50 saved words.
+
+| | Free | Pro | Lifetime |
+|---|:---:|:---:|:---:|
+| Subtitles, lookup, 13 languages | ✓ | ✓ | ✓ |
+| Spaced-repetition review | ✓ | ✓ | ✓ |
+| Saved words | 50 | unlimited | unlimited |
+| Export to Anki & CSV | — | ✓ | ✓ |
+| Playback speed | — | ✓ | ✓ |
+| Subtitle editor · library backup | — | — | ✓ |
+
+**€2.50/month** with a 7-day trial, or **€24.99 once.** No renewal, no account —
+a licence key you paste in. Billing is handled by Polar as Merchant of Record.
 
 ---
 
-## Elsewhere
+## How it is built
 
-The extension itself is on the Chrome Web Store.
+A Manifest V3 extension with no backend, which turned a product promise into the
+central engineering constraint: translation caching, licence validation, the
+review scheduler and the word library all run in the browser, inside a service
+worker Chrome stops whenever it likes.
 
-Questions about the work here — the architecture, the reasoning behind a
-decision, or the parts I got wrong before I got them right — are welcome as an
-issue on this repository, or through [github.com/ertanm](https://github.com/ertanm).
+- **A guest on someone else's page.** Netflix and YouTube re-render their
+  players without warning, so the overlay verifies its parent rather than its
+  presence and re-attaches itself — the difference between the two was the
+  oldest bug in the product.
+- **Per-site adapters.** Eight methods describe a platform; the rest of the code
+  never knows which site it is on.
+- **A build that refuses.** The release checklist is not a document, it is a
+  gate: the package will not be produced while a development flag is on or the
+  payment configuration points at a sandbox. The file list is derived from the
+  manifest, because a hand-kept one goes stale silently.
+- **Measured, not assumed.** The comparison above ships as a runnable script. A
+  planned context-window feature was deleted before it was written when the same
+  method showed it changed nothing in twelve cases.
+- **5,856 lines shipped, 9 test suites, 313 assertions, zero dependencies.**
+  The tests run on a clean checkout with nothing installed.
+
+---
+
+## Status
+
+In development, with a Chrome Web Store release in preparation. Netflix and
+YouTube today; more platforms once the store round is behind it.
+
+**The source is not public.** Watchword is a commercial product, so the
+repository here is the story rather than the code.
+
+Questions about the product or the work behind it are welcome as an issue on
+this repository, or through [github.com/ertanm](https://github.com/ertanm).
+
+<div align="center">
+
+<sub>© 2026 Watchword. All rights reserved.</sub>
+
+</div>
