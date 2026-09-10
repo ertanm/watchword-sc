@@ -1,0 +1,5 @@
+# Adds a "Sponsor" button to this repository. It lives here rather than in the
+# product repo because that one is private, and the button only ever renders on
+# a public page.
+github: [ertanm]
+buy_me_a_coffee: ertanm

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Watchword — Privacy Policy</title>
+<style>
+  :root { --bg:#141414; --panel:#1b1b1b; --ink:#ececec; --muted:#9a9a9a; --amber:#ffe082; }
+  * { box-sizing: border-box; }
+  body {
+    margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.65 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    padding:48px 20px;
+  }
+  main { max-width:720px; margin:0 auto; }
+  h1 { font-size:1.9rem; margin:0 0 4px; }
+  h1 span { color:var(--amber); }
+  .updated { color:var(--muted); margin:0 0 32px; font-size:.9rem; }
+  h2 { font-size:1.15rem; margin:32px 0 8px; }
+  a { color:var(--amber); }
+  ul { padding-left:1.2em; }
+  li { margin:6px 0; }
+  .lead {
+    background:var(--panel); border:1px solid #2a2a2a; border-radius:10px;
+    padding:16px 18px;
+  }
+  code { background:#000; padding:1px 5px; border-radius:4px; font-size:.9em; }
+  footer { color:var(--muted); font-size:.85rem; margin-top:40px; }
+</style>
+</head>
+<body>
+<main>
+  <!-- The wordmark is split across a <span> for its two-tone styling. That is
+       also why three rename passes missed the old name here: as split markup it
+       never existed as one string, so no grep could find it. -->
+  <h1>Watch<span>word</span> — Privacy Policy</h1>
+  <p class="updated">Last updated: 3 September 2026</p>
+
+  <p>Watchword is a browser extension that translates the subtitles on Netflix and
+  YouTube — showing them in your language, in both languages, or with a dictionary
+  card on any word. This policy explains exactly what data Watchword handles and
+  what it does not.</p>
+
+  <div class="lead">
+    <strong>The short version:</strong> Watchword has no accounts, no analytics, and
+    no servers of its own. It does not track you, profile you, or sell or share
+    your data. The only data it sends anywhere is the subtitle text and individual
+    words you choose to translate, which go to Google's public translate service
+    so they can be translated and shown back to you.
+  </div>
+
+  <h2>What Watchword accesses and why</h2>
+  <ul>
+    <li><strong>Subtitle text and hovered words (website content).</strong> On a
+    Netflix or YouTube watch page, Watchword reads the on-screen subtitle text to
+    display it, and sends subtitle lines (and any word you hover) to Google's
+    public translate endpoint (<code>translate.googleapis.com</code>) to be
+    translated and shown back to you. It is used solely to provide the
+    translation feature you requested.</li>
+    <li><strong>Your settings.</strong> Your language pair, subtitle mode, and
+    study options are saved locally with <code>chrome.storage</code>.</li>
+    <li><strong>Words you save.</strong> A saved word is stored with its
+    translation, the subtitle line it appeared in, a link back to the video, and
+    your review schedule. All of it stays on your device — there is no account it
+    could be uploaded to.</li>
+    <li><strong>Your license key, if you buy Pro or Lifetime.</strong> The key you
+    paste in is sent to Polar (<code>api.polar.sh</code>), our payment provider, to
+    check that it is valid, then stored locally. Free users never contact Polar at
+    all.</li>
+    <li><strong>A local translation cache.</strong> Translations are cached on your
+    device so repeats are instant and work offline. This cache never leaves your
+    device.</li>
+  </ul>
+
+  <h2>What Watchword does NOT do</h2>
+  <ul>
+    <li>No personally identifiable information, authentication, financial, health,
+    location, or browsing-history data.</li>
+    <li>No recording of clicks, keystrokes, or mouse movement as data.</li>
+    <li>No analytics or tracking of any kind.</li>
+    <li>No selling or transferring of data for advertising or any purpose
+    unrelated to translation.</li>
+    <li>No use of data for creditworthiness or lending.</li>
+  </ul>
+
+  <h2>Third-party services</h2>
+  <p>Watchword talks to exactly two outside services, and to nothing else.</p>
+  <ul>
+    <li><strong>Google Translate</strong> — subtitle text and hovered words are
+    sent there to be translated. Google's handling of that data is governed by
+    <a href="https://policies.google.com/privacy">Google's privacy policy</a>.
+    Watchword sends only the text to be translated and does not attach your
+    identity to it.</li>
+    <li><strong>Polar</strong> — only if you buy Pro or Lifetime, and only to
+    validate your license key. Polar is the Merchant of Record and handles the
+    payment on its own pages; Watchword never sees or stores your payment
+    details. <a href="https://polar.sh/legal/privacy">Polar's privacy policy</a>.</li>
+  </ul>
+
+  <h2>Permissions</h2>
+  <ul>
+    <li><code>storage</code> — save settings, saved words, and the translation
+    cache locally.</li>
+    <li>Access to <code>netflix.com</code> and <code>youtube.com</code> — read
+    subtitle text and display the overlay. The match is broader than the watch
+    pages because both sites are single-page apps: navigating to a video does not
+    reload the page, so the extension has to already be present to notice. It does
+    nothing on any other page.</li>
+    <li>Access to <code>translate.googleapis.com</code> — fetch translations.</li>
+    <li>Access to <code>api.polar.sh</code> — validate a license key, for paying
+    users only.</li>
+  </ul>
+
+  <h2>Data retention and removal</h2>
+  <p>Your settings, saved words, review schedule and translation cache live only on
+  your device. Removing the extension deletes all of Watchword's locally stored
+  data. If you want to keep your saved words first, the Saved Words page can export
+  them to a file.</p>
+
+  <h2>Changes to this policy</h2>
+  <p>If this policy changes, the updated version will be posted here with a new
+  "last updated" date.</p>
+
+  <h2>Contact</h2>
+  <!-- Email only while the repository is private: a privacy policy's contact
+       route is the one link that must not 404. The issue-tracker link goes
+       back the day the repo is public (Faz 0). -->
+  <p>Email <a href="mailto:ertansofia@gmail.com">ertansofia@gmail.com</a>.</p>
+
+  <footer>© 2026 Watchword</footer>
+</main>
+</body>
+</html>
