@@ -5,7 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Watchword — Privacy Policy</title>
 <style>
-  :root { --bg:#141414; --panel:#1b1b1b; --ink:#ececec; --muted:#9a9a9a; --amber:#ffe082; }
+  /* The Lifetime palette, taken from theme.css rather than invented here:
+     gold #E8B54A on the navy-deep ground #12111C that the Lifetime tier uses.
+     This page is the one public face of a product nobody has installed yet, so
+     it should look like the product. The values are copied, not imported —
+     the page has to stay a single self-contained file with no external CSS,
+     because it is served from a different repository than the stylesheet. */
+  :root {
+    --bg:#12111C; --panel:#1B1A27; --line:#2C2A3C;
+    --ink:#F5F6F8; --muted:#9AA3AF; --gold:#E8B54A;
+  }
   * { box-sizing: border-box; }
   body {
     margin:0; background:var(--bg); color:var(--ink);
@@ -13,19 +22,28 @@
     padding:48px 20px;
   }
   main { max-width:720px; margin:0 auto; }
-  h1 { font-size:1.9rem; margin:0 0 4px; }
-  h1 span { color:var(--amber); }
+  h1 { font-size:1.9rem; margin:0 0 4px; letter-spacing:-.01em; }
+  h1 span { color:var(--gold); }
   .updated { color:var(--muted); margin:0 0 32px; font-size:.9rem; }
-  h2 { font-size:1.15rem; margin:32px 0 8px; }
-  a { color:var(--amber); }
+  h2 { font-size:1.15rem; margin:32px 0 8px; color:var(--gold); font-weight:600; }
+  a { color:var(--gold); }
   ul { padding-left:1.2em; }
   li { margin:6px 0; }
   .lead {
-    background:var(--panel); border:1px solid #2a2a2a; border-radius:10px;
+    background:var(--panel); border:1px solid var(--line); border-radius:10px;
     padding:16px 18px;
+    /* The one claim a reader checks first deserves to be the one that stands
+       out, so the short version carries the tier accent down its edge. */
+    border-left:3px solid var(--gold);
   }
-  code { background:#000; padding:1px 5px; border-radius:4px; font-size:.9em; }
-  footer { color:var(--muted); font-size:.85rem; margin-top:40px; }
+  code {
+    background:#0C0B14; border:1px solid var(--line);
+    padding:1px 5px; border-radius:4px; font-size:.9em; color:var(--ink);
+  }
+  footer {
+    color:var(--muted); font-size:.85rem; margin-top:40px;
+    border-top:1px solid var(--line); padding-top:20px;
+  }
 </style>
 </head>
 <body>
@@ -96,6 +114,12 @@
     payment on its own pages; Watchword never sees or stores your payment
     details. <a href="https://polar.sh/legal/privacy">Polar's privacy policy</a>.</li>
   </ul>
+  <p>The free popup also shows one of two <strong>plain outbound links</strong>
+  (Anki and Buy Me a Coffee). They are ordinary links: nothing is loaded from
+  those sites, no tracker or redirect sits behind them, and nothing happens
+  unless you click. They are named here because a policy that says "two
+  services" while the interface shows two more addresses is a policy that
+  invites the wrong conclusion.</p>
 
   <h2>Permissions</h2>
   <ul>
