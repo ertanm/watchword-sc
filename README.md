@@ -162,6 +162,12 @@ thirteen languages, spaced-repetition review, and up to 50 saved words.
 **€2.50/month** with a 7-day trial, or **€24.99 once.** No renewal, no account —
 a licence key you paste in. Billing is handled by Polar as Merchant of Record.
 
+<img src="screenshots/tiers.png" alt="The same popup on the free, Pro and Lifetime tiers, side by side" width="1143">
+
+The tier is a colour, not a second interface: teal, coral, gold. Nothing moves
+and nothing is hidden behind a menu — what a tier buys is simply legible in
+place, and what it does not buy stays on screen instead of disappearing.
+
 ---
 
 ## How it is built
