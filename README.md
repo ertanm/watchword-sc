@@ -9,6 +9,8 @@ right on the Netflix or YouTube player.
 
 Manifest V3 · Chrome · No account · No analytics · No server
 
+<img src="screenshots/banner.png" alt="Watchword: a German subtitle line in white with its Turkish translation beneath it in gold" width="820">
+
 </div>
 
 ---
@@ -37,6 +39,11 @@ Watchword picks up where the platform stops.
 
 The same extension, one setting apart. That is why it works for an evening of
 television *and* for learning the language you are hearing.
+
+<img src="screenshots/modes.png" alt="The mode picker showing Dual, Source only and Translation only, with a live preview of the subtitle above it" width="610">
+
+The picker previews itself. Whatever you choose is drawn the way it will be
+drawn on the video, so the choice is made by looking rather than by guessing.
 
 ---
 
@@ -78,6 +85,12 @@ in and a link back to the scene. The library sorts itself into *new*,
 *learning* and *known*, and doubles as a spaced-repetition session — three
 boxes, one key per answer, and a way to retire a word once you are done with it.
 
+<img src="screenshots/review.png" alt="A review card showing the German word verschwunden, its Turkish meaning, the line it came from, and four answer buttons" width="798">
+
+The four answers are told apart by weight and by glyph, not by colour alone:
+ghost, then tinted, then solid. A distinction that disappears in greyscale is
+not a distinction.
+
 **Practise, not just watch.** Replay the current line with one key. Blur the
 translation until you have tried without it. Pause automatically on every new
 line. Slow the dialogue to 0.75× until you can hear the words.
@@ -86,9 +99,33 @@ line. Slow the dialogue to 0.75× until you can hear the words.
 background, corner radius, blur and both text colours. When subtitles are how
 you follow the show, being able to read them is not decoration.
 
+<img src="screenshots/studio.png" alt="The subtitle editor with sliders for size, position, background, corners and blur, above a live preview of the styled subtitle" width="693">
+
+The preview is not a mockup of the overlay. It loads the same stylesheet the
+video does, so what the sliders show and what the film shows cannot drift
+apart.
+
 **Thirteen languages, any pair.** German, English, Turkish, Spanish, French,
 Italian, Portuguese, Dutch, Russian, Japanese, Korean, Chinese, Arabic. The
 interface itself speaks English, Turkish and German.
+
+---
+
+## Setting it up
+
+Two questions and one reminder. Pick the language you are hearing and the one
+you already know, choose how the lines should be drawn, and turn the player's
+own subtitles on.
+
+<p>
+<img src="screenshots/setup-languages.png" alt="Onboarding step asking which language you are learning and which you already know" width="420">
+<img src="screenshots/setup-subtitles.png" alt="Onboarding step explaining that the player's own subtitles must be turned on" width="420">
+</p>
+
+That last screen exists because of the one thing Watchword cannot do:
+**it translates the subtitles a video already has, it does not transcribe the
+audio.** If a title ships no subtitle track at all there is nothing to work
+with, and saying so up front is cheaper than a confused first evening.
 
 ---
 
