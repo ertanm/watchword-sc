@@ -48,110 +48,58 @@
 </head>
 <body>
 <main>
-  <!-- The wordmark is split across a <span> for its two-tone styling. That is
-       also why three rename passes missed the old name here: as split markup it
-       never existed as one string, so no grep could find it. -->
-  <h1>Watch<span>word</span> — Privacy Policy</h1>
-  <p class="updated">Last updated: 3 September 2026</p>
+<h1>Watchword — Privacy Policy</h1>
 
-  <p>Watchword is a browser extension that translates the subtitles on Netflix and
-  YouTube — showing them in your language, in both languages, or with a dictionary
-  card on any word. This policy explains exactly what data Watchword handles and
-  what it does not.</p>
+<p>Last updated: 1 October 2026</p>
 
-  <div class="lead">
-    <strong>The short version:</strong> Watchword has no accounts, no analytics, and
-    no servers of its own. It does not track you, profile you, or sell or share
-    your data. The only data it sends anywhere is the subtitle text and individual
-    words you choose to translate, which go to Google's public translate service
-    so they can be translated and shown back to you.
-  </div>
+<p>Watchword translates existing Netflix and YouTube subtitles and lets you save words and phrases for local review. Watchword has no user accounts, analytics or backend of its own. Translation and optional licensing use the services below. We do not sell data or use it for advertising, profiling, creditworthiness or lending.</p>
 
-  <h2>What Watchword accesses and why</h2>
-  <ul>
-    <li><strong>Subtitle text and hovered words (website content).</strong> On a
-    Netflix or YouTube watch page, Watchword reads the on-screen subtitle text to
-    display it, and sends subtitle lines (and any word you hover) to Google's
-    public translate endpoint (<code>translate.googleapis.com</code>) to be
-    translated and shown back to you. It is used solely to provide the
-    translation feature you requested.</li>
-    <li><strong>Your settings.</strong> Your language pair, subtitle mode, and
-    study options are saved locally with <code>chrome.storage</code>.</li>
-    <li><strong>Words you save.</strong> A saved word is stored with its
-    translation, the subtitle line it appeared in, a link back to the video, and
-    your review schedule. All of it stays on your device — there is no account it
-    could be uploaded to.</li>
-    <li><strong>Your license key, if you buy Pro or Lifetime.</strong> The key you
-    paste in is sent to Polar (<code>api.polar.sh</code>), our payment provider, to
-    check that it is valid, then stored locally. Free users never contact Polar at
-    all.</li>
-    <li><strong>A local translation cache.</strong> Translations are cached on your
-    device so repeats are instant and work offline. This cache never leaves your
-    device.</li>
-  </ul>
+<h2>Translation and website content</h2>
 
-  <h2>What Watchword does NOT do</h2>
-  <ul>
-    <li>No personally identifiable information, authentication, financial, health,
-    location, or browsing-history data.</li>
-    <li>No recording of clicks, keystrokes, or mouse movement as data.</li>
-    <li>No analytics or tracking of any kind.</li>
-    <li>No selling or transferring of data for advertising or any purpose
-    unrelated to translation.</li>
-    <li>No use of data for creditworthiness or lending.</li>
-  </ul>
+<p>When enabled on a supported watch page, Watchword reads subtitle text for its overlay. Depending on the mode, subtitle lines are sent automatically for translation. Dictionary words/phrases and extension preview samples may also be translated. HTTPS requests send text and source/target language codes to Google's public translate endpoint at <code>translate.googleapis.com</code>. Text appears in the request URL. This is not an account-based Google Cloud Translation integration.</p>
 
-  <h2>Third-party services</h2>
-  <p>Watchword talks to exactly two outside services, and to nothing else.</p>
-  <ul>
-    <li><strong>Google Translate</strong> — subtitle text and hovered words are
-    sent there to be translated. Google's handling of that data is governed by
-    <a href="https://policies.google.com/privacy">Google's privacy policy</a>.
-    Watchword sends only the text to be translated and does not attach your
-    identity to it.</li>
-    <li><strong>Polar</strong> — only if you buy Pro or Lifetime, and only to
-    validate your license key. Polar is the Merchant of Record and handles the
-    payment on its own pages; Watchword never sees or stores your payment
-    details. <a href="https://polar.sh/legal/privacy">Polar's privacy policy</a>.</li>
-  </ul>
-  <p>The free popup also shows one of two <strong>plain outbound links</strong>
-  (Anki and Buy Me a Coffee). They are ordinary links: nothing is loaded from
-  those sites, no tracker or redirect sits behind them, and nothing happens
-  unless you click. They are named here because a policy that says "two
-  services" while the interface shows two more addresses is a policy that
-  invites the wrong conclusion.</p>
+<p>Watchword does not attach your name, email, library or license key to translation requests. Google receives normal network connection information, including IP address. Google's handling and retention follow its privacy policy: <a href="https://policies.google.com/privacy">https://policies.google.com/privacy</a>.</p>
 
-  <h2>Permissions</h2>
-  <ul>
-    <li><code>storage</code> — save settings, saved words, and the translation
-    cache locally.</li>
-    <li>Access to <code>netflix.com</code> and <code>youtube.com</code> — read
-    subtitle text and display the overlay. The match is broader than the watch
-    pages because both sites are single-page apps: navigating to a video does not
-    reload the page, so the extension has to already be present to notice. It does
-    nothing on any other page.</li>
-    <li>Access to <code>translate.googleapis.com</code> — fetch translations.</li>
-    <li>Access to <code>api.polar.sh</code> — validate a license key, for paying
-    users only.</li>
-  </ul>
+<h2>Local library and settings</h2>
 
-  <h2>Data retention and removal</h2>
-  <p>Your settings, saved words, review schedule and translation cache live only on
-  your device. Removing the extension deletes all of Watchword's locally stored
-  data. If you want to keep your saved words first, the Saved Words page can export
-  them to a file.</p>
+<p>Settings, saved vocabulary and review progress are stored in <code>chrome.storage.local</code>, not synced to a Watchword server. Entries can include word/phrase, translation, dictionary example, subtitle context and its available translation, language pair, video title, URL, platform, observed playback time and review dates. Watchword does not collect a general history of visited websites. Saved video references are part of your local library. Text used to obtain translations is transmitted as described above.</p>
 
-  <h2>Changes to this policy</h2>
-  <p>If this policy changes, the updated version will be posted here with a new
-  "last updated" date.</p>
+<ul><li><code>settings</code>: language pair, interface language, subtitle mode and study/display preferences.</li>
+<li><code>saved_v1</code>: vocabulary, context/source information and review progress.</li>
+<li><code>cache_v2</code>: subtitle/dictionary translations. Cached results can work offline; uncached requests need a connection.</li>
+<li><code>operations_v1</code>: up to 64 local operation receipts preventing duplicate saves/review answers on retry. These do not contain subtitle or vocabulary text and are not transmitted.</li>
+<li><code>license_v2</code>: entered license key, activation identifier, plan/status and validation time. Older local license records may be migrated here. Keys and activation identifiers are reused in licensing requests.</li></ul>
 
-  <h2>Contact</h2>
-  <!-- Email only while the repository is private: a privacy policy's contact
-       route is the one link that must not 404. The issue-tracker link goes
-       back the day the repo is public (Faz 0). -->
-  <p>Email <a href="mailto:ertansofia@gmail.com">ertansofia@gmail.com</a>.</p>
+<h2>Optional licensing and payments</h2>
 
-  <footer>© 2026 Watchword</footer>
+<p>Free use without a stored key does not automatically contact Polar. Entering a key, including an invalid one, can contact <code>api.polar.sh</code>. Stored keys may be revalidated even after entitlement expires and the interface shows Free.</p>
+
+<p>Activation, validation and deactivation send the key, organization identifier and, when applicable, activation identifier or device label &quot;Watchword&quot; to Polar over HTTPS. Keys are in request bodies, not URLs. Polar also receives normal connection information. Successful deactivation removes the local key; failed requests retain it for retry.</p>
+
+<p>Checkout and the customer portal open Polar's pages. Polar handles customer/payment information there; Watchword does not receive or store card details. See <a href="https://polar.sh/legal/privacy">https://polar.sh/legal/privacy</a>. This describes the existing integration, not a guarantee that paid plans or production checkout have completed release acceptance.</p>
+
+<h2>Feedback and external links</h2>
+
+<p>Feedback opens a draft in your email application. Watchword does not automatically send it or attach your library, subtitle history or key. If you send it, support receives your email and included information to respond and investigate. Do not include keys or sensitive information. You can contact support to request deletion of correspondence.</p>
+
+<p>Anki, Buy Me a Coffee, checkout and portal links open external sites only when selected; those sites apply their own privacy practices. Watchword does not load their tracking scripts into the extension. Optional pronunciation uses browser speech synthesis; processing depends on the browser, operating system and selected voice.</p>
+
+<h2>Permissions</h2>
+
+<ul><li><code>storage</code>: local settings, vocabulary, review, cache, operation receipts and licensing state.</li>
+<li><code>https://www.netflix.com/*</code> and <code>https://www.youtube.com/*</code>: read subtitles and show the overlay on supported watch pages. Navigation pages match because these sites can open videos without reloading the document.</li>
+<li><code>https://translate.googleapis.com/*</code>: translation and dictionary requests.</li>
+<li><code>https://api.polar.sh/*</code>: optional license activation, validation and deactivation.</li></ul>
+
+<p>Watchword does not record clicks, keystrokes or mouse movements as analytics. Scripts are packaged with the extension; translation responses are data, not remotely downloaded executable code.</p>
+
+<h2>Retention and removal</h2>
+
+<p>Local settings/library remain until changed, cleared with available controls or removed with the extension. The translation cache is bounded and older entries can be evicted. Uninstall deletes local extension storage, not previously exported files, provider records or support emails. Export/backup availability depends on the existing plan; Free users should not assume uninstall is reversible. Disabling the extension preserves local data.</p>
+
+<h2>Changes and contact</h2>
+
+<p>Changes appear here with a new date. Questions or requests: ertansofia@gmail.com.</p>
 </main>
 </body>
 </html>
